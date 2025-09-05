@@ -1,0 +1,17 @@
+{
+  "name": "fidelink-bridge",
+  "version": "0.1.0",
+  "description": "Starter anti-error para enlaces de WhatsApp y envío por Telegram.",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "lint": "node src/scripts/lint.js",
+    "health": "bash scripts/health-check.sh"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  }
+}
