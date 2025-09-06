@@ -6,53 +6,76 @@
 <title>FideLink Assistant</title>
 <meta name="theme-color" content="#0ea5e9"/>
 <style>
-  body{font-family:system-ui,Roboto,Segoe UI,Arial,sans-serif;margin:0;background:#0b1020;color:#e2e8f0}
-  .wrap{max-width:820px;margin:0 auto;padding:20px}
-  .card{background:#0f172a;border:1px solid #1f2a44;border-radius:16px;padding:18px;margin:12px 0}
+  :root{--bg:#0b1020;--card:#0f172a;--border:#1f2a44;--ink:#e2e8f0;--mut:#94a3b8}
+  *{box-sizing:border-box} body{font-family:system-ui,Roboto,Segoe UI,Arial,sans-serif;margin:0;background:var(--bg);color:var(--ink)}
+  .wrap{max-width:860px;margin:0 auto;padding:20px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;margin:12px 0}
   .title{display:flex;align-items:center;gap:12px}
-  .mic{display:inline-flex;align-items:center;gap:10px;padding:12px 16px;border-radius:999px;border:0;background:#10b981;color:#042;cursor:pointer;font-weight:800}
-  .mic.rec{background:#f59e0b;color:#120}
+  .pill{display:inline-block;background:#1f2a44;color:#cbd5e1;border-radius:999px;padding:4px 10px;font-size:12px;margin-left:8px}
   .row{display:grid;gap:10px}
   .row2{grid-template-columns:1fr 1fr}
+  input,select,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #334155;background:#0b1329;color:var(--ink)}
   .btn{background:#38bdf8;color:#00131a;border:0;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block}
-  .pill{display:inline-block;background:#1f2a44;color:#cbd5e1;border-radius:999px;padding:4px 10px;font-size:12px;margin-right:6px}
+  .btn.sec{background:#10b981;color:#052}
+  .btn.warn{background:#f59e0b;color:#210}
+  .mic{display:inline-flex;align-items:center;gap:10px;padding:12px 16px;border-radius:999px;border:0;background:#10b981;color:#042;cursor:pointer;font-weight:800}
+  .mic.rec{background:#f59e0b;color:#120}
+  .muted{color:var(--mut);font-size:12px}
   .out{white-space:pre-wrap}
-  .item{padding:12px;border:1px solid #1f2a44;border-radius:12px}
-  input,select{width:100%;padding:10px;border-radius:10px;border:1px solid #334155;background:#0b1329;color:#e2e8f0}
-  .muted{opacity:.8;font-size:12px}
+  .item{padding:12px;border:1px solid var(--border);border-radius:12px;margin-bottom:10px}
+  .actions{display:grid;gap:10px}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="title">
-    <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36'><rect width='100%' height='100%' rx='8' fill='%231f2a44'/><text x='50%' y='58%' text-anchor='middle' font-family='Arial' font-size='14' fill='%23cbd5e1'>FL</text></svg>" alt="FideLink" />
+    <img alt="FideLink" width="36" height="36"
+      src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36'><rect width='100%' height='100%' rx='8' fill='%231f2a44'/><text x='50%' y='58%' text-anchor='middle' font-family='Arial' font-size='14' fill='%23cbd5e1'>FL</text></svg>"/>
     <h1 style="margin:0">FideLink Assistant</h1>
-    <span class="pill">Beta</span>
+    <span class="pill">FULL</span>
   </div>
 
   <div class="card">
     <div class="row row2">
       <div>
-        <label>Número de WhatsApp del comercio</label>
-        <input id="wa" placeholder="54911..." inputmode="numeric" />
+        <label>API URL (pegá tu Web App /exec)</label>
+        <input id="api" placeholder="https://script.google.com/macros/s/XXXXX/exec"/>
+        <small class="muted">Si está vacío o falla, el sistema usa <b>modo demo</b>.</small>
       </div>
       <div>
-        <label>Idioma de voz</label>
+        <label>WhatsApp del comercio (solo dígitos)</label>
+        <input id="wa" placeholder="54911..."/>
+      </div>
+    </div>
+    <div class="row row2" style="margin-top:10px">
+      <div>
+        <label>Idioma</label>
         <select id="lang">
           <option value="es-AR">Español (AR)</option>
           <option value="es-ES">Español (ES)</option>
           <option value="pt-BR">Português (BR)</option>
         </select>
       </div>
+      <div>
+        <label>Método</label>
+        <div class="row" style="grid-template-columns:1fr 1fr">
+          <button id="btnMic" class="mic">🎤 Hablar</button>
+          <button id="btnClear" class="btn warn">🧹 Limpiar</button>
+        </div>
+      </div>
     </div>
-    <div style="margin-top:12px">
-      <button id="btnMic" class="mic">🎤 Hablar</button>
-      <span class="muted" id="hint">Decí: “¿Quién cumple hoy?”, “¿Qué promos esta semana?”, “Enviar agradecimiento a Ana por 15000”.</span>
+    <div style="margin-top:10px">
+      <label>Entrada por texto (alternativa al micrófono)</label>
+      <div class="row" style="grid-template-columns:1fr auto">
+        <input id="textIn" placeholder='Ej: "¿Quién cumple hoy?" o "Enviar agradecimiento a Ana por 15000"'/>
+        <button id="btnSend" class="btn">▶️ Enviar</button>
+      </div>
+      <div class="muted" id="hint">Sugerencias: “¿Quién cumple hoy?”, “¿Qué promos esta semana?”, “Recibiste tickets hoy?”, “Enviar agradecimiento a Ana por 15000”.</div>
     </div>
   </div>
 
   <div class="card">
-    <div class="pill">Lo que dijiste</div>
+    <div class="pill">Lo que dijiste/escribiste</div>
     <div id="heard" class="out">—</div>
   </div>
 
@@ -63,32 +86,33 @@
 
   <div class="card">
     <div class="pill">Acciones</div>
-    <div id="actions" class="row"></div>
+    <div id="actions" class="actions"></div>
   </div>
 
   <p class="muted">Consejo: “Agregar a pantalla de inicio” para usarlo como app.</p>
 </div>
 
 <script>
-/** CONFIGURA TU API (Apps Script Web App) **/
-const API_URL = 'https://script.google.com/macros/s/AKfycby_cuFEKoDYwl8Rrvq_fHu9FRJlwr6cnzx160KKDcKvA44CmG2vmC2btc1yeyCv3073nw/exec'; // ← pega tu URL
+/*** Persistencia simple ***/
 const $ = s => document.querySelector(s);
 const enc = encodeURIComponent;
-const digits = s => (s||'').replace(/\D/g,'');
-const speak = (text) => { try{ const u = new SpeechSynthesisUtterance(text); u.lang = $('#lang').value || 'es-AR'; speechSynthesis.speak(u);}catch(e){} };
-
-
-const LS = { wa:'fl_wa', lang:'fl_lang' };
+const digits = s => String(s||'').replace(/\D/g,'');
+const LS = { api:'fl_api', wa:'fl_wa', lang:'fl_lang' };
+$('#api').value = localStorage.getItem(LS.api)||'';
 $('#wa').value = localStorage.getItem(LS.wa)||'';
-$('#lang').value = localStorage.getItem(LS.lang)||'es-AR';
+$('#lang').value= localStorage.getItem(LS.lang)||'es-AR';
+$('#api').addEventListener('input', ()=>localStorage.setItem(LS.api, $('#api').value.trim()));
 $('#wa').addEventListener('input', ()=>localStorage.setItem(LS.wa, digits($('#wa').value)));
-$('#lang').addEventListener('change', ()=>localStorage.setItem(LS.lang, $('#lang').value));
+$('#lang').addEventListener('change',()=>localStorage.setItem(LS.lang,$('#lang').value));
 
-/** Reconocimiento de voz (push‑to‑talk) **/
+/*** Voz de salida ***/
+const speak = (text) => { try{ const u=new SpeechSynthesisUtterance(text); u.lang=$('#lang').value||'es-AR'; speechSynthesis.speak(u);}catch(e){} };
+
+/*** Reconocimiento de voz (push-to-talk) ***/
 let rec=null;
 function startRec(){
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SR){ alert('Este navegador no soporta reconocimiento de voz. Usá Chrome en Android o Safari en iPhone.'); return; }
+  if(!SR){ alert('Este navegador no soporta micrófono. Usá Chrome en Android o Safari en iPhone.'); return; }
   rec = new SR();
   rec.lang = $('#lang').value || 'es-AR';
   rec.interimResults = false;
@@ -105,95 +129,92 @@ function startRec(){
   rec.start();
 }
 $('#btnMic').addEventListener('click', startRec);
+$('#btnClear').addEventListener('click', ()=>{ $('#heard').textContent='—'; $('#resp').textContent='—'; $('#actions').innerHTML=''; });
 
-/** Router de comandos naturales (simple y eficaz) **/
+/*** Texto como alternativa ***/
+$('#btnSend').addEventListener('click', ()=>{ const t=$('#textIn').value.trim(); if(!t) return; $('#heard').textContent=t; routeCommand(t); });
+$('#textIn').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); $('#btnSend').click(); } });
+
+/*** Router principal: primero intenta NLU (API), si falla usa heurísticas locales y DEMO ***/
 async function routeCommand(raw){
-  const q = (raw||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+  const api = $('#api').value.trim();
+  const q = (raw||'').trim();
+  if (!q){ $('#resp').textContent='Decime algo…'; return; }
 
-  // Intents básicos
-  if (/quien(es)? cumple/.test(q) || /cumplean/.test(q)){
-    return handleCumples();
+  // 1) Si hay API_URL, probar NLU server (entrenable por Sheets)
+  if (api){
+    try{
+      const r = await fetch(api, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({action:'nlu_route', query:q})});
+      const data = await r.json();
+      if (data && data.ok){
+        const reply = data.reply || 'Listo.';
+        $('#resp').textContent = reply; speak(reply);
+        renderActions((data.actions||[]).map(a=>({label:a.label, href:a.href})));
+        return;
+      }
+    }catch(e){ /* falla API → seguimos con local */ }
   }
-  if (/promo/.test(q) || /oferta/.test(q) || /feriado/.test(q) || /patria/.test(q) || /semana/.test(q)){
-    return handlePromos();
-  }
-  if (/ticket|comprobante|compra/.test(q)){
-    return handleTickets();
-  }
-  // “enviar agradecimiento a Ana por 15000”
-  const m = q.match(/agradecimiento.*a\s+([a-záéíóúñ ]+)\s+por\s+(\d+(?:[.,]\d+)?)/i);
+
+  // 2) Fallback local (heurístico) + DEMO
+  const low = q.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  if (/cumple/.test(low)){ return handleCumples_demo(); }
+  if (/promo|oferta|feriado|patria|semana/.test(low)){ return handlePromos_demo(); }
+  if (/ticket|comprobante|compra/.test(low)){ return handleTickets_demo(); }
+
+  const m = low.match(/agradec.*a\s+([a-zñáéíóú ]+)\s+por\s+(\d+(?:[.,]\d+)?)/i);
   if (m){
-    const nombre = m[1].trim();
-    const monto  = m[2].replace(',', '.');
-    return handleAgradecimiento(nombre, monto);
+    const nombre = cap(m[1]); const monto = m[2].replace(',', '.');
+    return handleAgradecimiento_local(nombre, monto);
   }
 
-  // fallback ayuda
-  const help = 'Podés decir: "¿Quién cumple hoy?", "¿Qué promos esta semana?", "Recibiste tickets hoy?", "Enviar agradecimiento a Ana por 15000".';
-  $('#resp').textContent = help; speak(help);
-  $('#actions').innerHTML = '';
+  const help = 'Podés decir: "¿Quién cumple hoy?", "¿Qué promos esta semana?", "Recibiste tickets hoy?", o "Enviar agradecimiento a Ana por 15000".';
+  $('#resp').textContent = help; speak(help); $('#actions').innerHTML='';
 }
 
-/** Handlers: llaman al backend y crean botones de WhatsApp **/
-async function handleCumples(){
+function cap(s){ return String(s||'').trim().replace(/\s+/g,' ').replace(/\b\p{L}/gu, c=>c.toUpperCase()); }
+
+/*** DEMO handlers (si no hay API) ***/
+function handleCumples_demo(){
   $('#resp').textContent = 'Buscando cumpleañeros de hoy...'; $('#actions').innerHTML='';
-  // DEMO SIN API:
   const list = [
-    { name:'Ana Pérez',  phone:'5491112345678', textSuggested:'¡Feliz cumple, Ana! 🎉 Te esperamos con un mimo especial.' },
+    { name:'Ana Pérez', phone:'5491112345678', textSuggested:'¡Feliz cumple, Ana! 🎉 Te esperamos con un mimo especial.' },
     { name:'Juan Gómez', phone:'5491198765432', textSuggested:'¡Feliz cumple, Juan! 🎉 Pasá a buscar tu regalo.' }
   ];
-  const t = `Hoy cumplen: ${list.map(x=>x.name).join(', ')}.`;
-  $('#resp').textContent = t; speak(t);
+  const t = `Hoy cumplen: ${list.map(x=>x.name).join(', ')}.`; $('#resp').textContent=t; speak(t);
   renderActions(list.map(x=>({ label:`🎂 Saludar a ${x.name}`, href: buildWaLink(x.phone, x.textSuggested) })));
 }
-
-async function handlePromos(){
+function handlePromos_demo(){
   $('#resp').textContent = 'Revisando próximas promociones y feriados...'; $('#actions').innerHTML='';
-  // DEMO SIN API:
   const wa = $('#wa').value;
   const list = [
     { event:'Día de la Madre', date:'2025-10-12', messageSuggested:'Promo especial por el Día de la Madre: 2x1 en desayunos. ¿Querés que te cuente?' },
-    { event:'Finde Largo',     date:'2025-10-20', messageSuggested:'Este finde largo tenemos 15% OFF. ¿Reservamos?' }
+    { event:'Finde Largo', date:'2025-10-20', messageSuggested:'Este finde largo tenemos 15% OFF. ¿Reservamos?' }
   ];
-  const t = `Veo ${list.length} evento(s) próximo(s).`;
-  $('#resp').textContent = t; speak(t);
+  const t = `Veo ${list.length} evento(s) próximo(s).`; $('#resp').textContent=t; speak(t);
   renderActions(list.map(x=>({ label:`📣 ${x.event} (${x.date})`, href: buildWaLink(wa, x.messageSuggested) })));
 }
-
-async function handleTickets(){
+function handleTickets_demo(){
   $('#resp').textContent = 'Buscando tickets de hoy...'; $('#actions').innerHTML='';
-  // DEMO SIN API:
-  const list = [
-    { name:'Carla', phone:'5491111122233', amount: '15000', textSuggested:'¡Gracias, Carla! Registramos tu compra de $15000. Sumaste puntos en FideLink. 🙌' }
-  ];
+  const list = [{ name:'Carla', phone:'5491111122233', amount:'15000', textSuggested:'¡Gracias, Carla! Registramos tu compra de $15000. Sumaste puntos en FideLink. 🙌' }];
   $('#resp').textContent = `Tengo ${list.length} ticket(s).`; speak(`Tengo ${list.length} tickets.`);
   renderActions(list.map(x=>({ label:`🧾 Confirmar de ${x.name} $${x.amount}`, href: buildWaLink(x.phone, x.textSuggested) })));
 }
-
-async function handleAgradecimiento(nombre, monto){
-  $('#resp').textContent = `Armando agradecimiento para ${nombre} por $${monto}...`; $('#actions').innerHTML='';
-  // si tu backend calcula puntos/nivel, podés pedirlo aquí
+function handleAgradecimiento_local(nombre, monto){
+  const wa = $('#wa').value;
   const msg = `¡Gracias, ${nombre}! Registramos tu compra de $${monto}. Sumaste puntos en FideLink. 🙌`;
-  $('#resp').textContent = 'Listo. Tocá para enviar.';
-  renderActions([{ label:`💚 Agradecer a ${nombre}`, href: buildWaLink($('#wa').value, msg) }]);
-  speak('Listo. Preparé el mensaje.');
+  $('#resp').textContent = 'Listo. Tocá para enviar.'; speak('Listo. Preparé el mensaje.');
+  renderActions([{ label:`💚 Agradecer a ${nombre}`, href: buildWaLink(wa, msg) }]);
 }
 
-/** Utils UI **/
-function buildWaLink(phoneOrEmpty, text){
-  const p = digits(phoneOrEmpty);
-  if (p) return `https://wa.me/${p}?text=${enc(text)}`;
-  return `https://api.whatsapp.com/send?text=${enc(text)}`;
-}
+/*** Utilidades ***/
+function buildWaLink(phoneOrEmpty, text){ const p=digits(phoneOrEmpty); return p ? `https://wa.me/${p}?text=${enc(text)}` : `https://api.whatsapp.com/send?text=${enc(text)}`; }
 function renderActions(items){
   const box = $('#actions'); box.innerHTML='';
   items.forEach(it=>{
     const a = document.createElement('a'); a.className='btn'; a.href=it.href; a.target='_blank'; a.rel='noopener'; a.textContent=it.label;
-    const div = document.createElement('div'); div.className='item'; div.appendChild(a);
-    box.appendChild(div);
+    const div = document.createElement('div'); div.className='item'; div.appendChild(a); box.appendChild(div);
   });
 }
-function fail(e){ const t='No pude consultar los datos. Revisá tu conexión o API_URL.'; $('#resp').textContent=t; speak(t); console.error(e); }
 </script>
 </body>
 </html>
