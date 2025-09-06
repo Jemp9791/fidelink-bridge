@@ -3,17 +3,18 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>FideLink Assistant</title>
+<title>FideLink Assistant — FULL + Rubros</title>
 <meta name="theme-color" content="#0ea5e9"/>
 <style>
   :root{--bg:#0b1020;--card:#0f172a;--border:#1f2a44;--ink:#e2e8f0;--mut:#94a3b8}
   *{box-sizing:border-box} body{font-family:system-ui,Roboto,Segoe UI,Arial,sans-serif;margin:0;background:var(--bg);color:var(--ink)}
-  .wrap{max-width:860px;margin:0 auto;padding:20px}
+  .wrap{max-width:960px;margin:0 auto;padding:20px}
   .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;margin:12px 0}
   .title{display:flex;align-items:center;gap:12px}
   .pill{display:inline-block;background:#1f2a44;color:#cbd5e1;border-radius:999px;padding:4px 10px;font-size:12px;margin-left:8px}
   .row{display:grid;gap:10px}
   .row2{grid-template-columns:1fr 1fr}
+  .row3{grid-template-columns:1fr 1fr 1fr}
   input,select,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #334155;background:#0b1329;color:var(--ink)}
   .btn{background:#38bdf8;color:#00131a;border:0;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block}
   .btn.sec{background:#10b981;color:#052}
@@ -32,19 +33,36 @@
     <img alt="FideLink" width="36" height="36"
       src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36'><rect width='100%' height='100%' rx='8' fill='%231f2a44'/><text x='50%' y='58%' text-anchor='middle' font-family='Arial' font-size='14' fill='%23cbd5e1'>FL</text></svg>"/>
     <h1 style="margin:0">FideLink Assistant</h1>
-    <span class="pill">FULL</span>
+    <span class="pill">FULL + Rubros</span>
   </div>
 
+  <!-- Config -->
   <div class="card">
-    <div class="row row2">
+    <div class="row row3">
       <div>
-        <label>API URL (pegá tu Web App /exec)</label>
+        <label>API URL (Web App /exec)</label>
         <input id="api" placeholder="https://script.google.com/macros/s/XXXXX/exec"/>
-        <small class="muted">Si está vacío o falla, el sistema usa <b>modo demo</b>.</small>
+        <small class="muted">Si está vacío o falla, usa <b>modo demo</b>.</small>
       </div>
       <div>
         <label>WhatsApp del comercio (solo dígitos)</label>
         <input id="wa" placeholder="54911..."/>
+      </div>
+      <div>
+        <label>Rubro</label>
+        <select id="rubro">
+          <option value="generico">Genérico</option>
+          <option value="panaderia">Panadería</option>
+          <option value="indumentaria">Indumentaria</option>
+          <option value="gastronomia">Gastronomía</option>
+          <option value="electronica">Electrónica</option>
+          <option value="peluqueria">Peluquería/Estética</option>
+          <option value="farmacia">Farmacia</option>
+          <option value="fitness">Fitness/Deportes</option>
+          <option value="libreria">Librería/Regalería</option>
+          <option value="servicios">Servicios</option>
+          <option value="mascotas">Mascotas</option>
+        </select>
       </div>
     </div>
     <div class="row row2" style="margin-top:10px">
@@ -65,67 +83,62 @@
       </div>
     </div>
     <div style="margin-top:10px">
-      <label>Entrada por texto (alternativa al micrófono)</label>
+      <label>Entrada por texto</label>
       <div class="row" style="grid-template-columns:1fr auto">
-        <input id="textIn" placeholder='Ej: "¿Quién cumple hoy?" o "Enviar agradecimiento a Ana por 15000"'/>
+        <input id="textIn" placeholder='Ej: "¿Quién cumple hoy?" / "¿Qué promos esta semana?" / "Enviar agradecimiento a Ana por 15000"'/>
         <button id="btnSend" class="btn">▶️ Enviar</button>
       </div>
       <div class="muted" id="hint">Sugerencias: “¿Quién cumple hoy?”, “¿Qué promos esta semana?”, “Recibiste tickets hoy?”, “Enviar agradecimiento a Ana por 15000”.</div>
     </div>
   </div>
 
-  <div class="card">
-    <div class="pill">Lo que dijiste/escribiste</div>
-    <div id="heard" class="out">—</div>
-  </div>
+  <!-- Vistas -->
+  <div class="card"><div class="pill">Lo que dijiste/escribiste</div><div id="heard" class="out">—</div></div>
+  <div class="card"><div class="pill">Respuesta</div><div id="resp" class="out">—</div></div>
+  <div class="card"><div class="pill">Acciones</div><div id="actions" class="actions"></div></div>
 
+  <!-- Promos simples (local, sin Sheets) -->
   <div class="card">
-    <div class="pill">Respuesta</div>
-    <div id="resp" class="out">—</div>
-  </div>
-
-  <div class="card">
-    <div class="pill">Acciones</div>
-    <div id="actions" class="actions"></div>
+    <div class="pill">Promos</div>
+    <div class="actions">
+      <button class="btn sec" id="btnNewPromo">➕ Crear promo</button>
+    </div>
+    <div id="promoBox" class="out muted">No hay promos cargadas aún.</div>
   </div>
 
   <p class="muted">Consejo: “Agregar a pantalla de inicio” para usarlo como app.</p>
 </div>
 
 <script>
-/*** Persistencia simple ***/
+/*** Helpers + Persistencia ***/
 const $ = s => document.querySelector(s);
 const enc = encodeURIComponent;
 const digits = s => String(s||'').replace(/\D/g,'');
-const LS = { api:'fl_api', wa:'fl_wa', lang:'fl_lang' };
+const LS = { api:'fl_api', wa:'fl_wa', lang:'fl_lang', rubro:'fl_rubro', promos:'fl_promos' };
 $('#api').value = localStorage.getItem(LS.api)||'';
 $('#wa').value = localStorage.getItem(LS.wa)||'';
-$('#lang').value= localStorage.getItem(LS.lang)||'es-AR';
+$('#lang').value = localStorage.getItem(LS.lang)||'es-AR';
+$('#rubro').value = localStorage.getItem(LS.rubro)||'generico';
 $('#api').addEventListener('input', ()=>localStorage.setItem(LS.api, $('#api').value.trim()));
 $('#wa').addEventListener('input', ()=>localStorage.setItem(LS.wa, digits($('#wa').value)));
 $('#lang').addEventListener('change',()=>localStorage.setItem(LS.lang,$('#lang').value));
+$('#rubro').addEventListener('change',()=>localStorage.setItem(LS.rubro,$('#rubro').value));
 
 /*** Voz de salida ***/
 const speak = (text) => { try{ const u=new SpeechSynthesisUtterance(text); u.lang=$('#lang').value||'es-AR'; speechSynthesis.speak(u);}catch(e){} };
 
-/*** Reconocimiento de voz (push-to-talk) ***/
+/*** Reconocimiento de voz ***/
 let rec=null;
 function startRec(){
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SR){ alert('Este navegador no soporta micrófono. Usá Chrome en Android o Safari en iPhone.'); return; }
+  if(!SR){ alert('Este navegador no soporta micrófono. Usá Chrome (Android) o Safari (iPhone).'); return; }
   rec = new SR();
   rec.lang = $('#lang').value || 'es-AR';
-  rec.interimResults = false;
-  rec.maxAlternatives = 1;
-  $('#btnMic').classList.add('rec');
-  $('#heard').textContent = 'Escuchando...';
-  rec.onresult = (e)=>{
-    const txt = e.results[0][0].transcript;
-    $('#heard').textContent = txt;
-    routeCommand(txt);
-  };
+  rec.interimResults = false; rec.maxAlternatives = 1;
+  $('#btnMic').classList.add('rec'); $('#heard').textContent = 'Escuchando...';
+  rec.onresult = (e)=>{ const txt = e.results[0][0].transcript; $('#heard').textContent = txt; routeCommand(txt); };
   rec.onerror = ()=>{ $('#heard').textContent = 'No te escuché. Probá de nuevo.'; $('#btnMic').classList.remove('rec'); };
-  rec.onend = ()=>$('#btnMic').classList.remove('rec');
+  rec.onend = ()=> $('#btnMic').classList.remove('rec');
   rec.start();
 }
 $('#btnMic').addEventListener('click', startRec);
@@ -135,13 +148,39 @@ $('#btnClear').addEventListener('click', ()=>{ $('#heard').textContent='—'; $(
 $('#btnSend').addEventListener('click', ()=>{ const t=$('#textIn').value.trim(); if(!t) return; $('#heard').textContent=t; routeCommand(t); });
 $('#textIn').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); $('#btnSend').click(); } });
 
-/*** Router principal: primero intenta NLU (API), si falla usa heurísticas locales y DEMO ***/
+/*** DEMO/LOCAL handlers (si no hay API o falla) ***/
+function handleCumples_demo(){
+  $('#resp').textContent = 'Buscando cumpleañeros de hoy...'; $('#actions').innerHTML='';
+  const list = [
+    { name:'Ana Pérez', phone:'5491112345678', textSuggested:'🎉 ¡Feliz cumple, Ana! Te esperamos con un mimo especial.' },
+    { name:'Juan Gómez', phone:'5491198765432', textSuggested:'🎉 ¡Feliz cumple, Juan! Pasá a buscar tu regalo.' }
+  ];
+  const t = `Hoy cumplen: ${list.map(x=>x.name).join(', ')}.`; $('#resp').textContent=t; speak(t);
+  list.forEach(x=>{ renderActions([{ label:`🎂 Saludar a ${x.name}`, href: buildWaLink(x.phone, x.textSuggested) }]); });
+}
+function handlePromos_demo(){
+  $('#resp').textContent = 'Revisando próximas promociones y feriados...'; $('#actions').innerHTML='';
+  const wa = $('#wa').value;
+  const list = [
+    { event:'Día del Amigo', date:'2025-07-20', messageSuggested:'👯‍♀️ Promo Día del Amigo: 2x1 en picadas 🧀🎉' },
+    { event:'Finde Largo', date:'2025-10-20', messageSuggested:'🗓️ Finde largo: 15% OFF en combos seleccionados 🛍️' }
+  ];
+  const t = `Veo ${list.length} evento(s) próximo(s).`; $('#resp').textContent=t; speak(t);
+  list.forEach(x=>{ renderActions([{ label:`📣 ${x.event} (${x.date})`, href: buildWaLink(wa, x.messageSuggested) }]); });
+}
+function handleTickets_demo(){
+  $('#resp').textContent = 'Buscando tickets de hoy...'; $('#actions').innerHTML='';
+  const list = [{ name:'Carla', phone:'5491111122233', amount:'15000', textSuggested:'¡Gracias, Carla! Registramos tu compra de $15000. Sumaste puntos en FideLink. 🙌' }];
+  $('#resp').textContent = `Tengo ${list.length} ticket(s).`; speak(`Tengo ${list.length} tickets.`);
+  list.forEach(x=>{ renderActions([{ label:`🧾 Confirmar de ${x.name} $${x.amount}`, href: buildWaLink(x.phone, x.textSuggested) }]); });
+}
+
+/*** Router principal: intenta API NLU y si falla usa demo ***/
 async function routeCommand(raw){
   const api = $('#api').value.trim();
   const q = (raw||'').trim();
   if (!q){ $('#resp').textContent='Decime algo…'; return; }
 
-  // 1) Si hay API_URL, probar NLU server (entrenable por Sheets)
   if (api){
     try{
       const r = await fetch(api, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({action:'nlu_route', query:q})});
@@ -152,98 +191,111 @@ async function routeCommand(raw){
         renderActions((data.actions||[]).map(a=>({label:a.label, href:a.href})));
         return;
       }
-    }catch(e){ /* falla API → seguimos con local */ }
+    }catch(e){ /* fallo API → demo */ }
   }
 
-  // 2) Fallback local (heurístico) + DEMO
+  // Heurística local simple
   const low = q.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  if (/cumple/.test(low)){ return handleCumples_demo(); }
-  if (/promo|oferta|feriado|patria|semana/.test(low)){ return handlePromos_demo(); }
-  if (/ticket|comprobante|compra/.test(low)){ return handleTickets_demo(); }
+  if (/cumple/.test(low)) return handleCumples_demo();
+  if (/promo|oferta|feriado|patria|semana/.test(low)) return handlePromos_demo();
+  if (/ticket|comprobante|compra/.test(low)) return handleTickets_demo();
 
   const m = low.match(/agradec.*a\s+([a-zñáéíóú ]+)\s+por\s+(\d+(?:[.,]\d+)?)/i);
-  if (m){
-    const nombre = cap(m[1]); const monto = m[2].replace(',', '.');
-    return handleAgradecimiento_local(nombre, monto);
-  }
+  if (m){ const nombre = cap(m[1]); const monto = m[2].replace(',', '.'); return handleAgradecimiento_local(nombre, monto); }
 
   const help = 'Podés decir: "¿Quién cumple hoy?", "¿Qué promos esta semana?", "Recibiste tickets hoy?", o "Enviar agradecimiento a Ana por 15000".';
   $('#resp').textContent = help; speak(help); $('#actions').innerHTML='';
 }
-
 function cap(s){ return String(s||'').trim().replace(/\s+/g,' ').replace(/\b\p{L}/gu, c=>c.toUpperCase()); }
-
-/*** DEMO handlers (si no hay API) ***/
-function handleCumples_demo(){
-  $('#resp').textContent = 'Buscando cumpleañeros de hoy...'; $('#actions').innerHTML='';
-  const list = [
-    { name:'Ana Pérez', phone:'5491112345678', textSuggested:'¡Feliz cumple, Ana! 🎉 Te esperamos con un mimo especial.' },
-    { name:'Juan Gómez', phone:'5491198765432', textSuggested:'¡Feliz cumple, Juan! 🎉 Pasá a buscar tu regalo.' }
-  ];
-  const t = `Hoy cumplen: ${list.map(x=>x.name).join(', ')}.`; $('#resp').textContent=t; speak(t);
-  renderActions(list.map(x=>({ label:`🎂 Saludar a ${x.name}`, href: buildWaLink(x.phone, x.textSuggested) })));
-}
-function handlePromos_demo(){
-  $('#resp').textContent = 'Revisando próximas promociones y feriados...'; $('#actions').innerHTML='';
-  const wa = $('#wa').value;
-  const list = [
-    { event:'Día de la Madre', date:'2025-10-12', messageSuggested:'Promo especial por el Día de la Madre: 2x1 en desayunos. ¿Querés que te cuente?' },
-    { event:'Finde Largo', date:'2025-10-20', messageSuggested:'Este finde largo tenemos 15% OFF. ¿Reservamos?' }
-  ];
-  const t = `Veo ${list.length} evento(s) próximo(s).`; $('#resp').textContent=t; speak(t);
-  renderActions(list.map(x=>({ label:`📣 ${x.event} (${x.date})`, href: buildWaLink(wa, x.messageSuggested) })));
-}
-function handleTickets_demo(){
-  $('#resp').textContent = 'Buscando tickets de hoy...'; $('#actions').innerHTML='';
-  const list = [{ name:'Carla', phone:'5491111122233', amount:'15000', textSuggested:'¡Gracias, Carla! Registramos tu compra de $15000. Sumaste puntos en FideLink. 🙌' }];
-  $('#resp').textContent = `Tengo ${list.length} ticket(s).`; speak(`Tengo ${list.length} tickets.`);
-  renderActions(list.map(x=>({ label:`🧾 Confirmar de ${x.name} $${x.amount}`, href: buildWaLink(x.phone, x.textSuggested) })));
-}
 function handleAgradecimiento_local(nombre, monto){
-  const wa = $('#wa').value;
-  const msg = `¡Gracias, ${nombre}! Registramos tu compra de $${monto}. Sumaste puntos en FideLink. 🙌`;
+  const wa = $('#wa').value; const msg = `¡Gracias, ${nombre}! Registramos tu compra de $${monto}. Sumaste puntos en FideLink. 🙌`;
   $('#resp').textContent = 'Listo. Tocá para enviar.'; speak('Listo. Preparé el mensaje.');
   renderActions([{ label:`💚 Agradecer a ${nombre}`, href: buildWaLink(wa, msg) }]);
 }
 
-/*** Utilidades ***/
+/*** Utilidades comunes ***/
 function buildWaLink(phoneOrEmpty, text){ const p=digits(phoneOrEmpty); return p ? `https://wa.me/${p}?text=${enc(text)}` : `https://api.whatsapp.com/send?text=${enc(text)}`; }
-function renderActions(items){
-  const box = $('#actions'); box.innerHTML='';
-  items.forEach(it=>{
-    const a = document.createElement('a'); a.className='btn'; a.href=it.href; a.target='_blank'; a.rel='noopener'; a.textContent=it.label;
-    const div = document.createElement('div'); div.className='item'; div.appendChild(a); box.appendChild(div);
-  });
-}
-<script>
-/** ==== Sugeridor inteligente de mensajes (sin Sheets) ==== **/
 
-// Diccionario de plantillas por tipo de evento (podés sumar/editar)
-const FL_TEMPLATES = {
-  'cumple': (ctx)=> `🎉 ¡Feliz cumple, ${ctx.nombre||'cliente'}! ${ctx.emoji||'💚'} ` +
-                    `Te esperamos con un mimo especial. Válido hoy ${ctx.fecha||''}.`,
-  'feriado_gen': (ctx)=> `📣 ${ctx.evento||'Promo especial'} ${ctx.emoji||'🛍️'}\n` +
-                         `Aprovechá ${ctx.descuento||'un beneficio especial'} ` +
-                         `hasta ${ctx.fin||ctx.fecha||'la fecha indicada'}.`,
-  'amigo': (ctx)=> `👯‍♀️ ¡Día del Amigo! ${ctx.emoji||'🎁'} 2x1 en ${ctx.producto||'seleccionados'} ` +
-                   `solo el ${ctx.fecha||''}. ¿Pedimos?`,
-  'madre': (ctx)=> `🌷 Día de la Madre: ${ctx.descuento||'15% OFF'} en ${ctx.producto||'regalos'} ` +
-                   `hasta ${ctx.fin||ctx.fecha||''}. ${ctx.emoji||'🎁'}`,
-  'fin_de_semana_largo': (ctx)=> `🗓️ Finde largo: ${ctx.descuento||'15% OFF'} en ${ctx.producto||'combos'} ` +
-                                `hasta el ${ctx.fin||ctx.fecha||''}. ${ctx.emoji||'🛍️'}`
+/*** ============== SUGERIDOR (con Rubros) ============== ***/
+/** Plantillas base por tipo + especialización por rubro */
+const RUBRO_TEMPLATES = {
+  generico: {
+    amigo: (c)=> `👯‍♀️ ¡Día del Amigo! ${c.emoji||'🎁'} ${c.descuento||'15% OFF'} en ${c.producto||'combos seleccionados'} solo el ${c.fecha||''}.`,
+    madre: (c)=> `🌷 Día de la Madre: ${c.descuento||'15% OFF'} en ${c.producto||'regalos'} hasta ${c.fin||c.fecha||''}. ${c.emoji||'🎁'}`,
+    finde: (c)=> `🗓️ Finde largo: ${c.descuento||'15% OFF'} en ${c.producto||'combos'} hasta el ${c.fin||c.fecha||''}. ${c.emoji||'🛍️'}`
+  },
+  panaderia: {
+    amigo: (c)=> `🥖👯‍♀️ Día del Amigo: 2x1 en medialunas y facturas ${c.emoji||'🎉'} solo el ${c.fecha||''}.`,
+    madre: (c)=> `🥐🌷 Especial Mamá: box desayuno con ${c.descuento||'10% OFF'} hasta ${c.fin||c.fecha||''}.`,
+    finde: (c)=> `🥯 Finde largo: promos en panes + budines ${c.descuento||'15% OFF'} ${c.emoji||'🛍️'}`
+  },
+  indumentaria: {
+    amigo: (c)=> `👚👕 Día del Amigo: 2x1 en remeras ${c.emoji||'🎁'} solo el ${c.fecha||''}.`,
+    madre: (c)=> `👗🌷 Mamá con estilo: ${c.descuento||'20% OFF'} en vestidos hasta ${c.fin||c.fecha||''}.`,
+    finde: (c)=> `👜 Finde largo: ${c.descuento||'15% OFF'} en accesorios ${c.emoji||'🛍️'}`
+  },
+  gastronomia: {
+    amigo: (c)=> `🍕👯‍♀️ Día del Amigo: 2x1 en pizzas ${c.emoji||'🎉'} solo el ${c.fecha||''}.`,
+    madre: (c)=> `🍰🌷 Especial Mamá: postres con ${c.descuento||'15% OFF'} hasta ${c.fin||c.fecha||''}.`,
+    finde: (c)=> `🍝 Finde largo: combos familiares ${c.descuento||'15% OFF'} ${c.emoji||'🛍️'}`
+  },
+  electronica: {
+    amigo: (c)=> `🎧👯‍♀️ Día del Amigo: ${c.descuento||'10% OFF'} en auriculares ${c.emoji||'🔊'} solo el ${c.fecha||''}.`,
+    madre: (c)=> `📱🌷 Mamá tech: ${c.descuento||'15% OFF'} en smartphones hasta ${c.fin||c.fecha||''}.`,
+    finde: (c)=> `💻 Finde largo: accesorios ${c.descuento||'15% OFF'} ${c.emoji||'🛍️'}`
+  },
+  peluqueria: {
+    amigo: (c)=> `✂️👯‍♀️ Día del Amigo: 2x1 en brushing ${c.emoji||'🎁'} solo el ${c.fecha||''}.`,
+    madre: (c)=> `💇‍♀️🌷 Mamá: ${c.descuento||'15% OFF'} en color y corte hasta ${c.fin||c.fecha||''}.`,
+    finde: (c)=> `💅 Finde largo: combos uñas + cejas ${c.descuento||'15% OFF'} ${c.emoji||'🛍️'}`
+  },
+  farmacia: {
+    amigo: (c)=> `🧴👯‍♀️ Día del Amigo: ${c.descuento||'10% OFF'} en dermocosmética ${c.emoji||'💄'} solo el ${c.fecha||''}.`,
+    madre: (c)=> `🌷 Cuidado para Mamá: ${c.descuento||'15% OFF'} en fragancias hasta ${c.fin||c.fecha||''}.`,
+    finde: (c)=> `🩺 Finde largo: botiquín + protección solar ${c.descuento||'15% OFF'}`
+  },
+  fitness: {
+    amigo: (c)=> `🏋️‍♀️👯‍♀️ Día del Amigo: 2x1 en pases diarios ${c.emoji||'🔥'} solo el ${c.fecha||''}.`,
+    madre: (c)=> `🧘‍♀️🌷 Mamá activa: ${c.descuento||'20% OFF'} en clases hasta ${c.fin||c.fecha||''}.`,
+    finde: (c)=> `⚽ Finde largo: equipamiento ${c.descuento||'15% OFF'} ${c.emoji||'🛍️'}`
+  },
+  libreria: {
+    amigo: (c)=> `📘👯‍♀️ Día del Amigo: 2x1 en cuadernos ${c.emoji||'🎁'} solo el ${c.fecha||''}.`,
+    madre: (c)=> `📚🌷 Lecturas para Mamá: ${c.descuento||'15% OFF'} hasta ${c.fin||c.fecha||''}.`,
+    finde: (c)=> `✏️ Finde largo: kits escolares ${c.descuento||'15% OFF'}`
+  },
+  servicios: {
+    amigo: (c)=> `🧩👯‍♀️ Día del Amigo: ${c.descuento||'15% OFF'} en tu servicio ${c.emoji||'🎁'} solo el ${c.fecha||''}.`,
+    madre: (c)=> `🛠️🌷 Mamá: ${c.descuento||'20% OFF'} en mantenimiento/asesoría hasta ${c.fin||c.fecha||''}.`,
+    finde: (c)=> `🗓️ Finde largo: paquetes ${c.descuento||'15% OFF'} ${c.emoji||'🛍️'}`
+  },
+  mascotas: {
+    amigo: (c)=> `🐶👯‍♀️ Día del Amigo (de 4 patas): 2x1 en snacks ${c.emoji||'🎉'} solo el ${c.fecha||''}.`,
+    madre: (c)=> `🐾🌷 Especial Mamá Pet: ${c.descuento||'15% OFF'} en accesorios hasta ${c.fin||c.fecha||''}.`,
+    finde: (c)=> `🐱 Finde largo: arena + alimentos ${c.descuento||'15% OFF'}`
+  }
 };
 
-// Abre un modal con la propuesta, el vendedor puede editar y tocar OK
+// Fallback genérico para cumpleaños / feriado
+const FL_TEMPLATES = {
+  'cumple': (ctx)=> `🎉 ¡Feliz cumple, ${ctx.nombre||'cliente'}! ${ctx.emoji||'💚'} Te esperamos con un mimo especial. Válido hoy ${ctx.fecha||''}.`,
+  'feriado_gen': (ctx)=> `📣 ${ctx.evento||'Promo especial'} ${ctx.emoji||'🛍️'}\nAprovechá ${ctx.descuento||'un beneficio especial'} hasta ${ctx.fin||ctx.fecha||'la fecha indicada'}.`
+};
+
 function openAutoTemplateModal(payload){
-  const { tipo='feriado_gen', ctx={}, titulo='Sugerencia de mensaje' } = payload||{};
-  const tplFn = FL_TEMPLATES[tipo] || FL_TEMPLATES['feriado_gen'];
+  const { tipo='feriado', ctx={}, titulo='Sugerencia de mensaje' } = payload||{};
+  const rb = $('#rubro').value || 'generico';
+  // mapeo tipo → clave rubro
+  const key = tipo==='amigo' ? 'amigo' : tipo==='madre' ? 'madre' : 'finde';
+  const rubSet = RUBRO_TEMPLATES[rb] || RUBRO_TEMPLATES.generico;
+  const tplFn = rubSet[key] || FL_TEMPLATES['feriado_gen'];
   const sugerido = tplFn(ctx);
 
   const el = document.createElement('div');
   el.style = 'position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px;z-index:9999';
   el.innerHTML = `
-    <div class="card" style="max-width:680px;width:100%;background:#0f172a">
-      <div class="pill">${titulo}</div>
+    <div class="card" style="max-width:700px;width:100%;background:#0f172a">
+      <div class="pill">${titulo} · Rubro: ${rb}</div>
       <div class="row">
         <label>Mensaje propuesto (editable)</label>
         <textarea id="at_msg" rows="5">${sugerido}</textarea>
@@ -258,58 +310,150 @@ function openAutoTemplateModal(payload){
     </div>
   `;
   document.body.appendChild(el);
-
-  const $ = (s)=> el.querySelector(s);
-  $('#at_cancel').onclick = ()=> el.remove();
-  $('#at_copy').onclick = ()=>{
-    const t = $('#at_msg').value; navigator.clipboard.writeText(t).then(()=>{$('#at_out').textContent='Copiado ✅';});
-  };
-  $('#at_ok').onclick = ()=>{
-    const msg = $('#at_msg').value.trim();
-    if(!msg){ $('#at_out').textContent='Escribí un mensaje.'; return; }
-    const wa = (document.querySelector('#wa')?.value||'').replace(/\D/g,'');
-    const href = wa ? `https://wa.me/${wa}?text=${encodeURIComponent(msg)}`
-                    : `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
-    // Mostrar botón en la zona “Acciones”
-    const box = document.querySelector('#actions');
+  const $$ = (s)=> el.querySelector(s);
+  $$('#at_cancel').onclick = ()=> el.remove();
+  $$('#at_copy').onclick = ()=>{ const t = $$('#at_msg').value; navigator.clipboard.writeText(t).then(()=>{$$('#at_out').textContent='Copiado ✅';}); };
+  $$('#at_ok').onclick = ()=>{
+    const msg = $$('#at_msg').value.trim();
+    if(!msg){ $$('#at_out').textContent='Escribí un mensaje.'; return; }
+    const wa = ($('#wa')?.value||'').replace(/\D/g,'');
+    const href = wa ? `https://wa.me/${wa}?text=${encodeURIComponent(msg)}` : `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
+    const box = $('#actions');
     const div = document.createElement('div'); div.className='item';
     const a = document.createElement('a'); a.className='btn'; a.target='_blank'; a.rel='noopener';
     a.href = href; a.textContent = '📲 Abrir WhatsApp y enviar';
     div.appendChild(a); box.prepend(div);
-    // Feedback
-    const out = document.querySelector('#resp');
-    if(out){ out.textContent = 'Listo. Preparé el mensaje. Tocá el botón para enviarlo.'; }
+    $('#resp').textContent = 'Listo. Preparé el mensaje. Tocá el botón para enviarlo.';
     el.remove();
   };
 }
 
-// === Ejemplos de uso (llamá a estas funciones cuando corresponda) ===
-
-// 1) Desde “¿Qué promos esta semana?” (demo o real):
 function suggestFromUpcoming(evento, fechaISO){
-  // mapeo sencillo por nombre del evento a plantilla
-  let tipo = 'feriado_gen', emoji='🛍️';
+  // detectar tipo según nombre del evento
   const name = (evento||'').toLowerCase();
+  let tipo = 'finde';
   if (name.includes('amig')) tipo='amigo';
   else if (name.includes('madre')) tipo='madre';
-  else if (name.includes('finde') || name.includes('feriado')) tipo='fin_de_semana_largo';
-
-  openAutoTemplateModal({
-    titulo: `Sugerencia para: ${evento}`,
-    tipo,
-    ctx: { evento, fecha: fechaISO, descuento:'15% OFF', producto:'combos', emoji }
-  });
+  openAutoTemplateModal({ titulo:`Sugerencia para: ${evento}`, tipo, ctx:{ evento, fecha: fechaISO, descuento:'15% OFF', producto:'combos', emoji:'🛍️' } });
 }
-
-// 2) Desde un cumple detectado:
 function suggestBirthday(nombre){
-  openAutoTemplateModal({
-    titulo: `Saludo cumple: ${nombre}`,
-    tipo:'cumple',
-    ctx: { nombre, fecha: new Date().toISOString().slice(0,10), emoji:'🎂' }
+  // Para cumple uso plantilla global (no por rubro)
+  const msg = FL_TEMPLATES.cumple({ nombre, fecha: new Date().toISOString().slice(0,10), emoji:'🎂' });
+  const el = document.createElement('div');
+  el.style = 'position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px;z-index:9999';
+  el.innerHTML = `
+    <div class="card" style="max-width:700px;width:100%;background:#0f172a">
+      <div class="pill">Saludo cumple: ${nombre}</div>
+      <div class="row">
+        <textarea id="at_msg" rows="5">${msg}</textarea>
+        <div class="row" style="grid-template-columns:auto auto auto">
+          <button class="btn" id="ok">✅ OK, generar WhatsApp</button>
+          <button class="btn sec" id="cp">📋 Copiar texto</button>
+          <button class="btn warn" id="cl">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(el);
+  const $$ = s=> el.querySelector(s);
+  $$('#cl').onclick=()=>el.remove();
+  $$('#cp').onclick=()=>{ const t=$$('#at_msg').value; navigator.clipboard.writeText(t); };
+  $$('#ok').onclick=()=>{
+    const t = $$('#at_msg').value.trim();
+    const wa = ($('#wa')?.value||'').replace(/\D/g,'');
+    const href = wa ? `https://wa.me/${wa}?text=${encodeURIComponent(t)}` : `https://api.whatsapp.com/send?text=${encodeURIComponent(t)}`;
+    const box = $('#actions'); const div = document.createElement('div'); div.className='item';
+    const a = document.createElement('a'); a.className='btn'; a.target='_blank'; a.rel='noopener'; a.href = href; a.textContent = '📲 Abrir WhatsApp y enviar';
+    div.appendChild(a); box.prepend(div); $('#resp').textContent='Listo. Preparé el mensaje. Tocá para enviar.'; el.remove();
+  };
+}
+
+/*** Render de acciones: agrega botón “🤖 Sugerir” para promos/cumples ***/
+function renderActions(items){
+  const box = document.querySelector('#actions'); box.innerHTML='';
+  (items||[]).forEach(it=>{
+    const wrap = document.createElement('div'); wrap.className='item';
+    const a = document.createElement('a'); a.className='btn'; a.href=it.href; a.target='_blank'; a.rel='noopener';
+    a.textContent = it.label; wrap.appendChild(a);
+
+    // PROMO: label "📣 Evento (YYYY-MM-DD)"
+    const mPromo = /^📣\s+(.+?)\s+\((\d{4}-\d{2}-\d{2})\)/.exec(it.label || '');
+    if (mPromo){
+      const btn = document.createElement('button'); btn.className='btn sec'; btn.style.marginLeft='8px';
+      btn.textContent = '🤖 Sugerir mensaje'; btn.onclick = ()=> suggestFromUpcoming(mPromo[1], mPromo[2]); wrap.appendChild(btn);
+    }
+    // CUMPLE: label "🎂 Saludar a NOMBRE"
+    const mCumple = /^🎂\s+Saludar a\s+(.+)/.exec(it.label || '');
+    if (mCumple){
+      const btn = document.createElement('button'); btn.className='btn sec'; btn.style.marginLeft='8px';
+      btn.textContent = '🤖 Sugerir saludo'; btn.onclick = ()=> suggestBirthday(mCumple[1]); wrap.appendChild(btn);
+    }
+    box.appendChild(wrap);
   });
 }
-</script>
 
+/*** Promos locales (sin Sheets) — crear/editar/borrar + guardar opcional ***/
+const promosMem = JSON.parse(localStorage.getItem(LS.promos)||'[]');
+function renderPromos(){
+  const box = $('#promoBox');
+  if(!promosMem.length){ box.innerHTML = 'No hay promos cargadas aún.'; return; }
+  box.innerHTML = '';
+  promosMem.forEach((p,i)=>{
+    const prev = [`🗓️ ${p.fecha} — ${p.titulo}`, p.mensaje].join('\n');
+    const wa = buildWaLink($('#wa').value, p.mensaje);
+    const card = document.createElement('div'); card.className='item';
+    card.innerHTML = `
+      <div class="out" style="margin-bottom:8px">${prev.replaceAll('\n','<br>')}</div>
+      <div class="row" style="grid-template-columns:auto auto auto">
+        <a class="btn" target="_blank" rel="noopener" href="${wa}">📲 Enviar por WhatsApp</a>
+        <button class="btn warn" data-i="${i}">🗑️ Borrar</button>
+        <button class="btn" data-edit="${i}">✏️ Editar</button>
+      </div>`;
+    card.querySelector('[data-i]').onclick = (e)=>{ const idx=+e.currentTarget.getAttribute('data-i'); promosMem.splice(idx,1); localStorage.setItem(LS.promos, JSON.stringify(promosMem)); renderPromos(); };
+    card.querySelector('[data-edit]').onclick = (e)=>{ const idx=+e.currentTarget.getAttribute('data-edit'); openPromoCreator(promosMem[idx], idx); };
+    box.appendChild(card);
+  });
+}
+function openPromoCreator(existing=null, index=null){
+  const modal = document.createElement('div');
+  modal.style = 'position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px;z-index:9999';
+  modal.innerHTML = `
+    <div class="card" style="max-width:680px;width:100%;background:#0f172a">
+      <div class="pill">${existing ? 'Editar promo' : 'Crear promo'}</div>
+      <div class="row">
+        <label>Fecha (AAAA-MM-DD)</label>
+        <input id="pp_fecha" placeholder="2025-07-20" value="${existing?.fecha||''}">
+        <label>Título</label>
+        <input id="pp_titulo" placeholder="Ej: Día del Amigo 2x1" value="${existing?.titulo||''}">
+        <label>Mensaje (con emojis)</label>
+        <textarea id="pp_mensaje" rows="4" placeholder="👯‍♀️ Promo Día del Amigo: 2x1 en picadas 🧀🎉">${existing?.mensaje||''}</textarea>
+        <div class="row" style="grid-template-columns:auto auto auto">
+          <button class="btn" id="pp_preview">👀 Vista previa</button>
+          <button class="btn sec" id="pp_save">${existing?'💾 Guardar cambios':'✅ Guardar'}</button>
+          <button class="btn warn" id="pp_cancel">Cerrar</button>
+        </div>
+        <div id="pp_out" class="muted" style="margin-top:8px"></div>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  $('#pp_cancel').onclick = ()=> modal.remove();
+  $('#pp_preview').onclick = ()=>{ const o=getPromoForm(); $('#pp_out').innerText=`🗓️ ${o.fecha} — ${o.titulo}\n${o.mensaje}`; };
+  $('#pp_save').onclick = ()=>{
+    const o=getPromoForm();
+    if(!o.fecha || !/^\d{4}-\d{2}-\d{2}$/.test(o.fecha)){ alert('Fecha inválida. Usá AAAA-MM-DD.'); return; }
+    if(!o.titulo || !o.mensaje){ alert('Completá título y mensaje.'); return; }
+    if(index!=null){ promosMem[index] = o; } else { promosMem.unshift(o); }
+    localStorage.setItem(LS.promos, JSON.stringify(promosMem)); renderPromos();
+    savePromoServer(o).catch(()=>{}); modal.remove();
+  };
+  function getPromoForm(){ return { fecha:($('#pp_fecha').value||'').trim(), titulo:($('#pp_titulo').value||'').trim(), mensaje:($('#pp_mensaje').value||'').trim() }; }
+}
+async function savePromoServer(o){
+  const api = $('#api').value.trim(); if(!api) return;
+  try{ await fetch(api, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action:'promos_crear', data:o }) }); }catch(e){}
+}
+$('#btnNewPromo').addEventListener('click', ()=> openPromoCreator());
+renderPromos();
+</script>
 </body>
 </html>
