@@ -215,6 +215,101 @@ function renderActions(items){
     const div = document.createElement('div'); div.className='item'; div.appendChild(a); box.appendChild(div);
   });
 }
+<script>
+/** ==== Sugeridor inteligente de mensajes (sin Sheets) ==== **/
+
+// Diccionario de plantillas por tipo de evento (podés sumar/editar)
+const FL_TEMPLATES = {
+  'cumple': (ctx)=> `🎉 ¡Feliz cumple, ${ctx.nombre||'cliente'}! ${ctx.emoji||'💚'} ` +
+                    `Te esperamos con un mimo especial. Válido hoy ${ctx.fecha||''}.`,
+  'feriado_gen': (ctx)=> `📣 ${ctx.evento||'Promo especial'} ${ctx.emoji||'🛍️'}\n` +
+                         `Aprovechá ${ctx.descuento||'un beneficio especial'} ` +
+                         `hasta ${ctx.fin||ctx.fecha||'la fecha indicada'}.`,
+  'amigo': (ctx)=> `👯‍♀️ ¡Día del Amigo! ${ctx.emoji||'🎁'} 2x1 en ${ctx.producto||'seleccionados'} ` +
+                   `solo el ${ctx.fecha||''}. ¿Pedimos?`,
+  'madre': (ctx)=> `🌷 Día de la Madre: ${ctx.descuento||'15% OFF'} en ${ctx.producto||'regalos'} ` +
+                   `hasta ${ctx.fin||ctx.fecha||''}. ${ctx.emoji||'🎁'}`,
+  'fin_de_semana_largo': (ctx)=> `🗓️ Finde largo: ${ctx.descuento||'15% OFF'} en ${ctx.producto||'combos'} ` +
+                                `hasta el ${ctx.fin||ctx.fecha||''}. ${ctx.emoji||'🛍️'}`
+};
+
+// Abre un modal con la propuesta, el vendedor puede editar y tocar OK
+function openAutoTemplateModal(payload){
+  const { tipo='feriado_gen', ctx={}, titulo='Sugerencia de mensaje' } = payload||{};
+  const tplFn = FL_TEMPLATES[tipo] || FL_TEMPLATES['feriado_gen'];
+  const sugerido = tplFn(ctx);
+
+  const el = document.createElement('div');
+  el.style = 'position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px;z-index:9999';
+  el.innerHTML = `
+    <div class="card" style="max-width:680px;width:100%;background:#0f172a">
+      <div class="pill">${titulo}</div>
+      <div class="row">
+        <label>Mensaje propuesto (editable)</label>
+        <textarea id="at_msg" rows="5">${sugerido}</textarea>
+        <div class="row" style="grid-template-columns:auto auto auto">
+          <button class="btn" id="at_ok">✅ OK, generar WhatsApp</button>
+          <button class="btn sec" id="at_copy">📋 Copiar texto</button>
+          <button class="btn warn" id="at_cancel">Cerrar</button>
+        </div>
+        <small class="muted">Tip: podés agregar emojis y precios antes de tocar “OK”.</small>
+        <div id="at_out" class="muted"></div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(el);
+
+  const $ = (s)=> el.querySelector(s);
+  $('#at_cancel').onclick = ()=> el.remove();
+  $('#at_copy').onclick = ()=>{
+    const t = $('#at_msg').value; navigator.clipboard.writeText(t).then(()=>{$('#at_out').textContent='Copiado ✅';});
+  };
+  $('#at_ok').onclick = ()=>{
+    const msg = $('#at_msg').value.trim();
+    if(!msg){ $('#at_out').textContent='Escribí un mensaje.'; return; }
+    const wa = (document.querySelector('#wa')?.value||'').replace(/\D/g,'');
+    const href = wa ? `https://wa.me/${wa}?text=${encodeURIComponent(msg)}`
+                    : `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
+    // Mostrar botón en la zona “Acciones”
+    const box = document.querySelector('#actions');
+    const div = document.createElement('div'); div.className='item';
+    const a = document.createElement('a'); a.className='btn'; a.target='_blank'; a.rel='noopener';
+    a.href = href; a.textContent = '📲 Abrir WhatsApp y enviar';
+    div.appendChild(a); box.prepend(div);
+    // Feedback
+    const out = document.querySelector('#resp');
+    if(out){ out.textContent = 'Listo. Preparé el mensaje. Tocá el botón para enviarlo.'; }
+    el.remove();
+  };
+}
+
+// === Ejemplos de uso (llamá a estas funciones cuando corresponda) ===
+
+// 1) Desde “¿Qué promos esta semana?” (demo o real):
+function suggestFromUpcoming(evento, fechaISO){
+  // mapeo sencillo por nombre del evento a plantilla
+  let tipo = 'feriado_gen', emoji='🛍️';
+  const name = (evento||'').toLowerCase();
+  if (name.includes('amig')) tipo='amigo';
+  else if (name.includes('madre')) tipo='madre';
+  else if (name.includes('finde') || name.includes('feriado')) tipo='fin_de_semana_largo';
+
+  openAutoTemplateModal({
+    titulo: `Sugerencia para: ${evento}`,
+    tipo,
+    ctx: { evento, fecha: fechaISO, descuento:'15% OFF', producto:'combos', emoji }
+  });
+}
+
+// 2) Desde un cumple detectado:
+function suggestBirthday(nombre){
+  openAutoTemplateModal({
+    titulo: `Saludo cumple: ${nombre}`,
+    tipo:'cumple',
+    ctx: { nombre, fecha: new Date().toISOString().slice(0,10), emoji:'🎂' }
+  });
+}
 </script>
+
 </body>
 </html>
