@@ -137,49 +137,37 @@ async function routeCommand(raw){
 /** Handlers: llaman al backend y crean botones de WhatsApp **/
 async function handleCumples(){
   $('#resp').textContent = 'Buscando cumpleañeros de hoy...'; $('#actions').innerHTML='';
-  try{
-    const res = await fetch(API_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({action:'cumples_hoy'})});
-    const data = await res.json();
-    const list = data?.items || []; // espera [{name, phone, textSuggested}]
-    if(!list.length){ const t='Hoy no hay cumpleañeros.'; $('#resp').textContent=t; speak(t); return; }
-    const t = `Hoy cumplen: ${list.map(x=>x.name).join(', ')}.`;
-    $('#resp').textContent = t; speak(t);
-    renderActions(list.map(x=>({
-      label: `🎂 Saludar a ${x.name}`,
-      href: buildWaLink(x.phone, x.textSuggested || `¡Feliz cumple, ${x.name}! 🎉 Te esperamos con un mimo especial.`)
-    })));
-  }catch(e){ fail(e); }
+  // DEMO SIN API:
+  const list = [
+    { name:'Ana Pérez',  phone:'5491112345678', textSuggested:'¡Feliz cumple, Ana! 🎉 Te esperamos con un mimo especial.' },
+    { name:'Juan Gómez', phone:'5491198765432', textSuggested:'¡Feliz cumple, Juan! 🎉 Pasá a buscar tu regalo.' }
+  ];
+  const t = `Hoy cumplen: ${list.map(x=>x.name).join(', ')}.`;
+  $('#resp').textContent = t; speak(t);
+  renderActions(list.map(x=>({ label:`🎂 Saludar a ${x.name}`, href: buildWaLink(x.phone, x.textSuggested) })));
 }
 
 async function handlePromos(){
   $('#resp').textContent = 'Revisando próximas promociones y feriados...'; $('#actions').innerHTML='';
-  try{
-    const res = await fetch(API_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({action:'promos_proximas'})});
-    const data = await res.json();
-    const list = data?.items || []; // [{event, date, messageSuggested}]
-    if(!list.length){ const t='No hay promos próximas configuradas.'; $('#resp').textContent=t; speak(t); return; }
-    const t = `Veo ${list.length} evento(s) próximo(s).`;
-    $('#resp').textContent = t; speak(t);
-    renderActions(list.map(x=>({
-      label: `📣 ${x.event} (${x.date})`,
-      href: buildWaLink($('#wa').value, x.messageSuggested || `Promo especial por ${x.event}. ¿Querés que te cuente?`)
-    })));
-  }catch(e){ fail(e); }
+  // DEMO SIN API:
+  const wa = $('#wa').value;
+  const list = [
+    { event:'Día de la Madre', date:'2025-10-12', messageSuggested:'Promo especial por el Día de la Madre: 2x1 en desayunos. ¿Querés que te cuente?' },
+    { event:'Finde Largo',     date:'2025-10-20', messageSuggested:'Este finde largo tenemos 15% OFF. ¿Reservamos?' }
+  ];
+  const t = `Veo ${list.length} evento(s) próximo(s).`;
+  $('#resp').textContent = t; speak(t);
+  renderActions(list.map(x=>({ label:`📣 ${x.event} (${x.date})`, href: buildWaLink(wa, x.messageSuggested) })));
 }
 
 async function handleTickets(){
   $('#resp').textContent = 'Buscando tickets de hoy...'; $('#actions').innerHTML='';
-  try{
-    const res = await fetch(API_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({action:'tickets_hoy'})});
-    const data = await res.json();
-    const list = data?.items || []; // [{name, phone, amount, textSuggested}]
-    if(!list.length){ const t='Hoy no hay tickets pendientes.'; $('#resp').textContent=t; speak(t); return; }
-    $('#resp').textContent = `Tengo ${list.length} ticket(s).`; speak(`Tengo ${list.length} tickets.`);
-    renderActions(list.map(x=>({
-      label: `🧾 Confirmar de ${x.name} $${x.amount}`,
-      href: buildWaLink(x.phone, x.textSuggested || `¡Gracias, ${x.name}! Registramos tu compra de $${x.amount}.`)
-    })));
-  }catch(e){ fail(e); }
+  // DEMO SIN API:
+  const list = [
+    { name:'Carla', phone:'5491111122233', amount: '15000', textSuggested:'¡Gracias, Carla! Registramos tu compra de $15000. Sumaste puntos en FideLink. 🙌' }
+  ];
+  $('#resp').textContent = `Tengo ${list.length} ticket(s).`; speak(`Tengo ${list.length} tickets.`);
+  renderActions(list.map(x=>({ label:`🧾 Confirmar de ${x.name} $${x.amount}`, href: buildWaLink(x.phone, x.textSuggested) })));
 }
 
 async function handleAgradecimiento(nombre, monto){
