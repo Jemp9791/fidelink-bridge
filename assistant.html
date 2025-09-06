@@ -77,6 +77,7 @@ const enc = encodeURIComponent;
 const digits = s => (s||'').replace(/\D/g,'');
 const speak = (text) => { try{ const u = new SpeechSynthesisUtterance(text); u.lang = $('#lang').value || 'es-AR'; speechSynthesis.speak(u);}catch(e){} };
 
+
 const LS = { wa:'fl_wa', lang:'fl_lang' };
 $('#wa').value = localStorage.getItem(LS.wa)||'';
 $('#lang').value = localStorage.getItem(LS.lang)||'es-AR';
