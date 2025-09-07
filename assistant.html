@@ -2,322 +2,154 @@
 <html lang="es">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>FideLink Assistant</title>
-<meta name="theme-color" content="#0ea5e9"/>
+<link rel="icon" href="data:,">
 <style>
-  :root{--bg:#0b1020;--card:#0f172a;--border:#1f2a44;--ink:#e2e8f0;--mut:#94a3b8}
-  *{box-sizing:border-box} body{font-family:system-ui,Roboto,Segoe UI,Arial,sans-serif;margin:0;background:var(--bg);color:var(--ink)}
-  .wrap{max-width:960px;margin:0 auto;padding:20px}
-  .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;margin:12px 0}
-  .title{display:flex;align-items:center;gap:12px}
-  .pill{display:inline-block;background:#1f2a44;color:#cbd5e1;border-radius:999px;padding:4px 10px;font-size:12px;margin-left:8px}
-  .row{display:grid;gap:10px}
-  .row2{grid-template-columns:1fr 1fr}
-  .row3{grid-template-columns:1fr 1fr 1fr}
-  input,select,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #334155;background:#0b1329;color:var(--ink)}
-  .btn{background:#38bdf8;color:#00131a;border:0;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block}
-  .btn.sec{background:#10b981;color:#052}
-  .btn.warn{background:#f59e0b;color:#210}
-  .mic{display:inline-flex;align-items:center;gap:10px;padding:12px 16px;border-radius:999px;border:0;background:#10b981;color:#042;cursor:pointer;font-weight:800}
-  .mic.rec{background:#f59e0b;color:#120}
-  .muted{color:var(--mut);font-size:12px}
-  .out{white-space:pre-wrap}
-  .item{padding:12px;border:1px solid var(--border);border-radius:12px;margin-bottom:10px}
-  .actions{display:grid;gap:10px}
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#0f172a;color:#e5e7eb;margin:0}
+  .wrap{max-width:920px;margin:24px auto;padding:16px}
+  .card{background:#111827;border:1px solid #1f2937;border-radius:14px;padding:16px;margin:12px 0}
+  label{display:block;font-size:13px;color:#9ca3af;margin-bottom:6px}
+  input,select,button,textarea{width:100%;padding:10px;border-radius:12px;border:1px solid #374151;background:#0b1220;color:#e5e7eb}
+  button{cursor:pointer;font-weight:600}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .actions a{display:inline-block;margin:6px 6px 0 0;padding:10px 12px;border-radius:12px;border:1px solid #374151;color:#e5e7eb;text-decoration:none}
+  .muted{color:#9ca3af;font-size:12px}
+  h1{font-size:28px;margin:8px 0 12px}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="title">
-    <img alt="Logo" width="36" height="36" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36'><rect width='100%' height='100%' rx='8' fill='%231f2a44'/><text x='50%' y='58%' text-anchor='middle' font-family='Arial' font-size='14' fill='%23cbd5e1'>FL</text></svg>"/>
-    <h1 style="margin:0">FideLink — Assistant</h1>
-    <span class="pill">Pro</span>
-  </div>
+  <h1>FideLink Assistant <span class="muted">Beta</span></h1>
 
-  <!-- Config -->
   <div class="card">
-    <div class="row row3">
+    <div class="row">
       <div>
         <label>API URL (tu Web App /exec)</label>
-        <input id="api" placeholder="https://script.google.com/macros/s/AKfycbxl1RDZFlQef7tc3QsILsHMGnukDUgwVV5LGa-zwCkDVeWySmH0Q9cXGeNPXvPQfO_QkQ/exec"/>
-        <small class="muted">Si está vacío o falla, usa <b>modo demo</b>.</small>
+        <input id="apiUrl" placeholder="https://script.google.com/macros/s/.../exec"/>
       </div>
       <div>
-        <label>WhatsApp del comercio (solo dígitos)</label>
-        <input id="wa" placeholder="54911..."/>
-      </div>
-      <div>
-        <label>Rubro</label>
-        <select id="rubro">
-          <option value="generico">Genérico</option>
-          <option value="panaderia">Panadería</option>
-          <option value="indumentaria">Indumentaria</option>
-          <option value="gastronomia">Gastronomía</option>
-          <option value="electronica">Electrónica</option>
-          <option value="peluqueria">Peluquería/Estética</option>
-          <option value="farmacia">Farmacia</option>
-          <option value="fitness">Fitness/Deportes</option>
-          <option value="libreria">Librería/Regalería</option>
-          <option value="servicios">Servicios</option>
-          <option value="mascotas">Mascotas</option>
-        </select>
-      </div>
-    </div>
-    <div class="row row2" style="margin-top:10px">
-      <div>
-        <label>Idioma</label>
+        <label>Idioma de voz</label>
         <select id="lang">
           <option value="es-AR">Español (AR)</option>
           <option value="es-ES">Español (ES)</option>
           <option value="pt-BR">Português (BR)</option>
         </select>
       </div>
-      <div>
-        <label>Acceso rápido</label>
-        <div class="row" style="grid-template-columns:1fr 1fr">
-          <button id="btnMic" class="mic">🎤 Hablar</button>
-          <button id="btnClear" class="btn warn">🧹 Limpiar</button>
-        </div>
-      </div>
     </div>
-    <div style="margin-top:10px">
-      <label>Entrada por texto</label>
-      <div class="row" style="grid-template-columns:1fr auto">
-        <input id="textIn" placeholder='Ej: "¿Quién cumple hoy?" / "¿Qué promos esta semana?" / "Enviar agradecimiento a Ana por 15000"'/>
-        <button id="btnSend" class="btn">▶️ Enviar</button>
-      </div>
-      <div class="muted" id="hint">Sugerencias: “¿Quién cumple hoy?”, “¿Qué promos esta semana?”, “Recibiste tickets hoy?”, “Enviar agradecimiento a Ana por 15000”.</div>
+    <div style="margin-top:8px" class="muted">
+      Consejo: añadí esta página a la <b>pantalla de inicio</b> para usarla como app.
     </div>
   </div>
 
-  <!-- Vistas -->
-  <div class="card"><div class="pill">Lo que dijiste/escribiste</div><div id="heard" class="out">—</div></div>
-  <div class="card"><div class="pill">Respuesta</div><div id="resp" class="out">—</div></div>
-  <div class="card"><div class="pill">Acciones</div><div id="actions" class="actions"></div></div>
-
-  <!-- Promos locales (sin Sheets) -->
   <div class="card">
-    <div class="pill">Promos</div>
-    <div class="actions">
-      <button class="btn sec" id="btnNewPromo">➕ Crear promo</button>
+    <div class="row">
+      <div>
+        <label>Comandos por voz o texto</label>
+        <button id="btnMic">🎤 Hablar</button>
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <input id="text" placeholder='Ej.: "¿Quién cumple hoy?", "Enviar agradecimiento a Ana por 15000"' />
+      </div>
     </div>
-    <div id="promoBox" class="out muted">No hay promos cargadas aún.</div>
+    <div style="margin-top:10px" class="row">
+      <div>
+        <label>Lo que dijiste</label>
+        <div id="heard" class="card" style="min-height:38px"></div>
+      </div>
+      <div>
+        <label>Respuesta</label>
+        <div id="reply" class="card" style="min-height:38px"></div>
+      </div>
+    </div>
+    <div class="actions" id="actions"></div>
   </div>
 
-  <p class="muted">Tip: “Agregar a pantalla de inicio” para usarlo como app.</p>
+  <div class="card">
+    <label>Perfil del negocio detectado</label>
+    <div id="profile" class="muted">—</div>
+  </div>
 </div>
 
 <script>
-/*** ===== Persistencia básica ===== ***/
-const $ = s=>document.querySelector(s);
-const enc = encodeURIComponent;
-const digits = s=> String(s||'').replace(/\D/g,'');
-const LS = { api:'fl_api', wa:'fl_wa', lang:'fl_lang', rubro:'fl_rubro', promos:'fl_promos' };
-$('#api').value = localStorage.getItem(LS.api)||'';
-$('#wa').value = localStorage.getItem(LS.wa)||'';
-$('#lang').value = localStorage.getItem(LS.lang)||'es-AR';
-$('#rubro').value = localStorage.getItem(LS.rubro)||'generico';
-$('#api').addEventListener('input', ()=>localStorage.setItem(LS.api, $('#api').value.trim()));
-$('#wa').addEventListener('input', ()=>localStorage.setItem(LS.wa, digits($('#wa').value)));
-$('#lang').addEventListener('change',()=>localStorage.setItem(LS.lang,$('#lang').value));
-$('#rubro').addEventListener('change',()=>localStorage.setItem(LS.rubro,$('#rubro').value));
+/* ====== Guardado/lectura de API y Sheet ID ====== */
+const q = new URL(location.href);
+const qSheet = q.searchParams.get('sheet') || '';
+if (qSheet) localStorage.setItem('FIDELINK_SHEET_ID', qSheet);
+const SHEET_ID = localStorage.getItem('FIDELINK_SHEET_ID') || '';
 
-/*** ===== Cargar perfil desde la API (lee hoja Configuración) ===== ***/
-async function loadBusinessProfile(){
-  const api=$('#api').value.trim(); if(!api) return;
+const inputApi = document.querySelector('#apiUrl');
+inputApi.value = localStorage.getItem('FIDELINK_API_URL') || '';
+inputApi.addEventListener('change', () => localStorage.setItem('FIDELINK_API_URL', inputApi.value.trim()));
+
+/* ====== Utilidad para llamar al backend (siempre manda sheet_id) ====== */
+async function callApi(payload){
+  const url = (localStorage.getItem('FIDELINK_API_URL') || inputApi.value || '').trim();
+  if (!url) throw new Error('Falta API URL (/exec).');
+  const body = Object.assign({}, payload, { sheet_id: SHEET_ID });
+  const res = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+  return await res.json();
+}
+
+/* ====== UI mínima ====== */
+const heard = v => document.querySelector('#heard').textContent = v||'—';
+const say   = v => document.querySelector('#reply').textContent = v||'—';
+const actDiv= document.querySelector('#actions');
+
+function setActions(list){
+  actDiv.innerHTML = '';
+  (list||[]).forEach(a=>{
+    const el = document.createElement('a');
+    el.textContent = a.label || 'Acción';
+    el.href = a.href || 'javascript:void(0)';
+    el.target = '_blank';
+    actDiv.appendChild(el);
+  });
+}
+
+async function refreshProfile(){
   try{
-    const r=await fetch(api,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'business_profile'})});
-    const d=await r.json(); if(!d?.ok) return;
-    if(d.profile?.wa){ $('#wa').value=String(d.profile.wa); localStorage.setItem(LS.wa,String(d.profile.wa)); }
-    if(d.profile?.rubro){ $('#rubro').value=d.profile.rubro; localStorage.setItem(LS.rubro,d.profile.rubro); }
-    if(d.profile?.nombre){ document.title=`FideLink — ${d.profile.nombre}`; const h1=document.querySelector('h1'); if(h1) h1.textContent=d.profile.nombre+' — Assistant'; }
-    if(d.profile?.logo_url){ const img=document.querySelector('.title img'); if(img) img.src=d.profile.logo_url; }
-    window.FL_PROFILE=d.profile||{}; window.FL_TEMPLATES_BASE=d.templates||{};
-  }catch(e){}
-}
-loadBusinessProfile();
-$('#api').addEventListener('change', loadBusinessProfile);
-
-/*** ===== Voz ===== ***/
-const speak = (t)=>{ try{ const u=new SpeechSynthesisUtterance(t); u.lang=$('#lang').value||'es-AR'; speechSynthesis.speak(u);}catch(e){} };
-
-/*** ===== Mic ===== ***/
-let rec=null;
-function startRec(){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){ alert('Tu navegador no soporta micrófono. Probá Chrome Android o Safari iPhone.'); return; }
-  rec=new SR(); rec.lang=$('#lang').value||'es-AR'; rec.interimResults=false; rec.maxAlternatives=1;
-  $('#btnMic').classList.add('rec'); $('#heard').textContent='Escuchando...';
-  rec.onresult=(e)=>{ const txt=e.results[0][0].transcript; $('#heard').textContent=txt; routeCommand(txt); };
-  rec.onerror =()=>{ $('#heard').textContent='No te escuché. Probá de nuevo.'; $('#btnMic').classList.remove('rec'); };
-  rec.onend =()=> $('#btnMic').classList.remove('rec');
-  rec.start();
-}
-$('#btnMic').addEventListener('click', startRec);
-$('#btnClear').addEventListener('click', ()=>{ $('#heard').textContent='—'; $('#resp').textContent='—'; $('#actions').innerHTML=''; });
-$('#btnSend').addEventListener('click', ()=>{ const t=$('#textIn').value.trim(); if(!t) return; $('#heard').textContent=t; routeCommand(t); });
-$('#textIn').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); $('#btnSend').click(); } });
-
-/*** ===== Acciones ===== ***/
-function renderActions(items){
-  const box=$('#actions'); box.innerHTML='';
-  (items||[]).forEach(it=>{
-    const wrap=document.createElement('div'); wrap.className='item';
-    const a=document.createElement('a'); a.className='btn'; a.href=it.href; a.target='_blank'; a.rel='noopener'; a.textContent=it.label; wrap.appendChild(a);
-    // Detectar promos: "📣 Evento (YYYY-MM-DD)"
-    const mPromo=/^📣\s+(.+?)\s+\((\d{4}-\d{2}-\d{2})\)/.exec(it.label||'');
-    if(mPromo){ const b=document.createElement('button'); b.className='btn sec'; b.style.marginLeft='8px'; b.textContent='🤖 Sugerir mensaje'; b.onclick=()=>suggestFromUpcoming(mPromo[1],mPromo[2]); wrap.appendChild(b); }
-    // Detectar cumple: "🎂 Saludar a NOMBRE"
-    const mCumple=/^🎂\s+Saludar a\s+(.+)/.exec(it.label||'');
-    if(mCumple){ const b=document.createElement('button'); b.className='btn sec'; b.style.marginLeft='8px'; b.textContent='🤖 Sugerir saludo'; b.onclick=()=>suggestBirthday(mCumple[1]); wrap.appendChild(b); }
-    box.appendChild(wrap);
-  });
-}
-function buildWaLink(phoneOrEmpty, text){ const p=digits(phoneOrEmpty); return p?`https://wa.me/${p}?text=${enc(text)}`:`https://api.whatsapp.com/send?text=${enc(text)}`; }
-
-/*** ===== Router principal ===== ***/
-async function routeCommand(raw){
-  const api=$('#api').value.trim(); const q=(raw||'').trim(); if(!q){ $('#resp').textContent='Decime algo…'; return; }
-  if(api){
-    try{
-      const r=await fetch(api,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'nlu_route',query:q})});
-      const d=await r.json();
-      if(d?.ok){ const reply=d.reply||'Listo.'; $('#resp').textContent=reply; speak(reply); renderActions((d.actions||[]).map(a=>({label:a.label,href:a.href}))); return; }
-    }catch(e){}
+    const r = await callApi({ action:'business_profile' });
+    if (!r.ok) throw new Error(r.error||'error');
+    document.querySelector('#profile').textContent =
+      `${r.negocio.nombre||'(sin nombre)'} • ${r.negocio.rubro||'-'} • WA ${r.negocio.wa||'-'}`;
+  }catch(err){
+    document.querySelector('#profile').textContent = 'No pude leer el perfil. Revisá API_URL y sheet_id.';
   }
-  // Fallback demo
-  const low=q.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  if(/cumple/.test(low)) return handleCumples_demo();
-  if(/promo|oferta|feriado|semana/.test(low)) return handlePromos_demo();
-  if(/ticket|comprobante|compra/.test(low)) return handleTickets_demo();
+}
+refreshProfile();
 
-  const m=low.match(/agradec.*a\s+([a-zñáéíóú ]+)\s+por\s+(\d+(?:[.,]\d+)?)/i);
-  if(m){ const nombre=cap(m[1]); const monto=m[2].replace(',','.'); return handleAgradecimiento_local(nombre,monto); }
-  const help='Podés decir: "¿Quién cumple hoy?", "¿Qué promos esta semana?", "Recibiste tickets hoy?", o "Enviar agradecimiento a Ana por 15000".';
-  $('#resp').textContent=help; speak(help); $('#actions').innerHTML='';
-}
-function cap(s){ return String(s||'').trim().replace(/\s+/g,' ').replace(/\b\p{L}/gu,c=>c.toUpperCase()); }
+/* ====== NLU (texto) ====== */
+document.querySelector('#text').addEventListener('keydown', async (e)=>{
+  if (e.key !== 'Enter') return;
+  const query = e.target.value.trim();
+  if (!query) return;
+  heard(query); say('…');
+  try{
+    const r = await callApi({ action:'nlu_route', query });
+    if (!r.ok) throw new Error(r.error||'error');
+    say(r.reply || 'Listo.');
+    setActions(r.actions);
+  }catch(err){ say('No pude procesar. Revisá conexión / API_URL.'); }
+});
 
-/*** ===== DEMO handlers ===== ***/
-function handleCumples_demo(){
-  $('#resp').textContent='Buscando cumpleañeros de hoy...'; $('#actions').innerHTML='';
-  const list=[{name:'Ana Pérez',phone:'5491112345678',textSuggested:'🎉 ¡Feliz cumple, Ana! Te esperamos con un mimo especial.'}];
-  const t=`Hoy cumplen: ${list.map(x=>x.name).join(', ')}.`; $('#resp').textContent=t; speak(t);
-  list.forEach(x=> renderActions([{label:`🎂 Saludar a ${x.name}`, href: buildWaLink(x.phone,x.textSuggested)}]) );
-}
-function handlePromos_demo(){
-  $('#resp').textContent='Revisando próximas promociones y feriados...'; $('#actions').innerHTML='';
-  const wa=$('#wa').value; const list=[{event:'Día del Amigo',date:'2025-07-20',messageSuggested:'👯‍♀️ 2x1 en picadas 🧀🎉'}];
-  const t=`Veo ${list.length} evento(s) próximo(s).`; $('#resp').textContent=t; speak(t);
-  list.forEach(x=> renderActions([{label:`📣 ${x.event} (${x.date})`, href: buildWaLink(wa,x.messageSuggested)}]) );
-}
-function handleTickets_demo(){
-  $('#resp').textContent='Buscando tickets de hoy...'; $('#actions').innerHTML='';
-  const x={name:'Carla',phone:'5491111122233',amount:'15000',textSuggested:'¡Gracias, Carla! Registramos tu compra de $15000. Sumaste puntos en FideLink. 🙌'};
-  $('#resp').textContent='Tengo 1 ticket.'; speak('Tengo un ticket.'); renderActions([{label:`🧾 Confirmar de ${x.name} $${x.amount}`, href: buildWaLink(x.phone,x.textSuggested)}]);
-}
-function handleAgradecimiento_local(nombre,monto){
-  const wa=$('#wa').value; const msg=`¡Gracias, ${nombre}! Registramos tu compra de $${monto}. Sumaste puntos en FideLink. 🙌`;
-  $('#resp').textContent='Listo. Tocá para enviar.'; speak('Listo. Preparé el mensaje.'); renderActions([{label:`💚 Agradecer a ${nombre}`, href: buildWaLink(wa,msg)}]);
-}
-
-/*** ===== Sugeridor con rubro (plantillas) ===== ***/
-const RUBRO_TEMPLATES = {
-  generico:{ amigo:c=>`👯‍♀️ Día del Amigo: ${c.descuento||'15% OFF'} en ${c.producto||'combos'} solo el ${c.fecha||''}.`,
-             madre:c=>`🌷 Día de la Madre: ${c.descuento||'15% OFF'} en ${c.producto||'regalos'} hasta ${c.fin||c.fecha||''}.`,
-             finde:c=>`🗓️ Finde largo: ${c.descuento||'15% OFF'} en ${c.producto||'combos'} hasta ${c.fin||c.fecha||''}.` },
-  panaderia:{ amigo:c=>`🥖👯‍♀️ Día del Amigo: 2x1 en medialunas ${c.fecha||''}.`, madre:c=>`🥐🌷 Desayuno para Mamá: ${c.descuento||'10% OFF'} hasta ${c.fin||c.fecha||''}.`, finde:c=>`🥯 Finde: panes + budines ${c.descuento||'15% OFF'}` },
-  indumentaria:{ amigo:c=>`👚 Día del Amigo: 2x1 en remeras ${c.fecha||''}.`, madre:c=>`👗🌷 Mamá: ${c.descuento||'20% OFF'} en vestidos.`, finde:c=>`👜 Finde: ${c.descuento||'15% OFF'} en accesorios.` },
-  gastronomia:{ amigo:c=>`🍕👯‍♀️ Amigo: 2x1 en pizzas ${c.fecha||''}.`, madre:c=>`🍰🌷 Mamá: postres ${c.descuento||'15% OFF'}.`, finde:c=>`🍝 Finde largo: combos familiares ${c.descuento||'15% OFF'}.` },
-  electronica:{ amigo:c=>`🎧 Amigo: ${c.descuento||'10% OFF'} en auriculares ${c.fecha||''}.`, madre:c=>`📱🌷 Mamá tech: ${c.descuento||'15% OFF'} en smartphones.`, finde:c=>`💻 Finde: accesorios ${c.descuento||'15% OFF'}.` },
-  peluqueria:{ amigo:c=>`✂️ Amigo: 2x1 en brushing ${c.fecha||''}.`, madre:c=>`💇‍♀️🌷 Mamá: ${c.descuento||'15% OFF'} en color y corte.`, finde:c=>`💅 Finde: combos uñas + cejas ${c.descuento||'15% OFF'}.` },
-  farmacia:{ amigo:c=>`🧴 Amigo: ${c.descuento||'10% OFF'} en dermocosmética.`, madre:c=>`🌷 Fragancias ${c.descuento||'15% OFF'}.`, finde:c=>`🩺 Botiquín ${c.descuento||'15% OFF'}.` },
-  fitness:{ amigo:c=>`🏋️‍♀️ Amigo: 2x1 en pases diarios.`, madre:c=>`🧘‍♀️ Mamá activa: ${c.descuento||'20% OFF'} en clases.`, finde:c=>`⚽ Finde: equipamiento ${c.descuento||'15% OFF'}.` },
-  libreria:{ amigo:c=>`📘 Amigo: 2x1 en cuadernos.`, madre:c=>`📚 Mamá: ${c.descuento||'15% OFF'} en libros.`, finde:c=>`✏️ Finde: kits escolares ${c.descuento||'15% OFF'}.` },
-  servicios:{ amigo:c=>`🧩 Amigo: ${c.descuento||'15% OFF'} en tu servicio.`, madre:c=>`🛠️ Mamá: ${c.descuento||'20% OFF'} en mantenimiento.`, finde:c=>`🗓️ Finde: paquetes ${c.descuento||'15% OFF'}.` },
-  mascotas:{ amigo:c=>`🐶 Amigo peludo: 2x1 en snacks.`, madre:c=>`🐾 Mamá Pet: ${c.descuento||'15% OFF'} en accesorios.`, finde:c=>`🐱 Finde: arena + alimentos ${c.descuento||'15% OFF'}.` }
-};
-function appendFirma(msg){
-  const base=(window.FL_TEMPLATES_BASE?.firma||'').trim(); if(!base) return msg;
-  const p=(window.FL_PROFILE||{}); const rep=base.replace('{NEGOCIO}',p.nombre||'').replace('{HORARIO}',p.horario||'').replace('{DIRECCION}',p.direccion||'').replace('{WA}',p.wa||'');
-  return `${msg}\n\n${rep}`;
-}
-function openAutoTemplateModal(payload){
-  const { tipo='finde', ctx={}, titulo='Sugerencia de mensaje' } = payload||{};
-  const rb=$('#rubro').value||'generico'; const tpl=(RUBRO_TEMPLATES[rb]||RUBRO_TEMPLATES.generico)[tipo]||RUBRO_TEMPLATES.generico.finde;
-  const sugerido=appendFirma(tpl(ctx));
-  const el=document.createElement('div'); el.style='position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px;z-index:9999';
-  el.innerHTML=`<div class="card" style="max-width:700px;width:100%;background:#0f172a">
-    <div class="pill">${titulo} · Rubro: ${rb}</div>
-    <div class="row">
-      <label>Mensaje propuesto (editable)</label>
-      <textarea id="at_msg" rows="5">${sugerido}</textarea>
-      <div class="row" style="grid-template-columns:auto auto auto">
-        <button class="btn" id="at_ok">✅ OK, generar WhatsApp</button>
-        <button class="btn sec" id="at_copy">📋 Copiar texto</button>
-        <button class="btn warn" id="at_cancel">Cerrar</button>
-      </div>
-      <div id="at_out" class="muted"></div>
-    </div></div>`;
-  document.body.appendChild(el);
-  const $$=s=>el.querySelector(s);
-  $$('#at_cancel').onclick=()=>el.remove();
-  $$('#at_copy').onclick=()=>{ const t=$$('#at_msg').value; navigator.clipboard.writeText(t).then(()=>{$$('#at_out').textContent='Copiado ✅';}); };
-  $$('#at_ok').onclick=()=>{
-    const msg=$$('#at_msg').value.trim(); if(!msg){ $$('#at_out').textContent='Escribí un mensaje.'; return; }
-    const wa=($('#wa')?.value||'').replace(/\D/g,''); const href=wa?`https://wa.me/${wa}?text=${encodeURIComponent(msg)}`:`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
-    const box=$('#actions'); const div=document.createElement('div'); div.className='item';
-    const a=document.createElement('a'); a.className='btn'; a.target='_blank'; a.rel='noopener'; a.href=href; a.textContent='📲 Abrir WhatsApp y enviar';
-    div.appendChild(a); box.prepend(div); $('#resp').textContent='Listo. Preparé el mensaje. Tocá el botón para enviarlo.'; el.remove();
-  };
-}
-function suggestFromUpcoming(evento, fechaISO){
-  const name=(evento||'').toLowerCase(); let tipo='finde'; if(name.includes('amig')) tipo='amigo'; else if(name.includes('madre')) tipo='madre';
-  openAutoTemplateModal({ titulo:`Sugerencia para: ${evento}`, tipo, ctx:{ evento, fecha:fechaISO, descuento:'15% OFF', producto:'combos' } });
-}
-function suggestBirthday(nombre){
-  const base=`🎉 ¡Feliz cumple, ${nombre}! Te esperamos con un mimo especial.`; openAutoTemplateModal({ titulo:`Saludo cumple: ${nombre}`, tipo:'finde', ctx:{}, }); // reutilizo modal editable
-  setTimeout(()=>{ const t=document.querySelector('#at_msg'); if(t){ t.value=appendFirma(base); } },50);
-}
-
-/*** ===== Promos locales (crear/editar sin Sheets) ===== ***/
-const promosMem=JSON.parse(localStorage.getItem(LS.promos)||'[]');
-function renderPromos(){
-  const box=$('#promoBox'); if(!promosMem.length){ box.innerHTML='No hay promos cargadas aún.'; return; }
-  box.innerHTML=''; promosMem.forEach((p,i)=>{ const prev=`🗓️ ${p.fecha} — ${p.titulo}\n${p.mensaje}`; const wa=buildWaLink($('#wa').value,p.mensaje);
-    const card=document.createElement('div'); card.className='item';
-    card.innerHTML=`<div class="out" style="margin-bottom:8px">${prev.replaceAll('\n','<br>')}</div>
-      <div class="row" style="grid-template-columns:auto auto auto">
-        <a class="btn" target="_blank" rel="noopener" href="${wa}">📲 Enviar por WhatsApp</a>
-        <button class="btn warn" data-i="${i}">🗑️ Borrar</button>
-        <button class="btn" data-edit="${i}">✏️ Editar</button></div>`;
-    card.querySelector('[data-i]').onclick=e=>{ const idx=+e.currentTarget.getAttribute('data-i'); promosMem.splice(idx,1); localStorage.setItem(LS.promos,JSON.stringify(promosMem)); renderPromos(); };
-    card.querySelector('[data-edit]').onclick=e=>{ const idx=+e.currentTarget.getAttribute('data-edit'); openPromoCreator(promosMem[idx],idx); };
-    box.appendChild(card);
-  });
-}
-function openPromoCreator(existing=null,index=null){
-  const modal=document.createElement('div'); modal.style='position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px;z-index:9999';
-  modal.innerHTML=`<div class="card" style="max-width:680px;width:100%;background:#0f172a"><div class="pill">${existing?'Editar promo':'Crear promo'}</div>
-    <div class="row"><label>Fecha (AAAA-MM-DD)</label><input id="pp_fecha" placeholder="2025-07-20" value="${existing?.fecha||''}">
-      <label>Título</label><input id="pp_titulo" placeholder="Ej: Día del Amigo 2x1" value="${existing?.titulo||''}">
-      <label>Mensaje (con emojis)</label><textarea id="pp_mensaje" rows="4" placeholder="👯‍♀️ Promo Día del Amigo: 2x1 en picadas 🧀🎉">${existing?.mensaje||''}</textarea>
-      <div class="row" style="grid-template-columns:auto auto auto"><button class="btn" id="pp_preview">👀 Vista previa</button>
-      <button class="btn sec" id="pp_save">${existing?'💾 Guardar':'✅ Guardar'}</button><button class="btn warn" id="pp_cancel">Cerrar</button></div>
-      <div id="pp_out" class="muted" style="margin-top:8px"></div></div></div>`;
-  document.body.appendChild(modal);
-  $('#pp_cancel').onclick=()=>modal.remove();
-  $('#pp_preview').onclick=()=>{ const o=getPromoForm(); $('#pp_out').innerText=`🗓️ ${o.fecha} — ${o.titulo}\n${o.mensaje}`; };
-  $('#pp_save').onclick=()=>{ const o=getPromoForm(); if(!o.fecha||!/^\d{4}-\d{2}-\d{2}$/.test(o.fecha)) return alert('Fecha inválida AAAA-MM-DD');
-    if(!o.titulo||!o.mensaje) return alert('Completá título y mensaje.'); if(index!=null) promosMem[index]=o; else promosMem.unshift(o);
-    localStorage.setItem(LS.promos,JSON.stringify(promosMem)); renderPromos(); savePromoServer(o).catch(()=>{}); modal.remove(); };
-  function getPromoForm(){ return {fecha:($('#pp_fecha').value||'').trim(), titulo:($('#pp_titulo').value||'').trim(), mensaje:($('#pp_mensaje').value||'').trim()}; }
-}
-async function savePromoServer(o){ const api=$('#api').value.trim(); if(!api) return;
-  try{ await fetch(api,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'promos_crear',data:o})}); }catch(e){} }
-$('#btnNewPromo').addEventListener('click', ()=> openPromoCreator());
-renderPromos();
+/* ====== Voz simple (Web Speech API, si está) ====== */
+const btnMic = document.querySelector('#btnMic');
+btnMic.addEventListener('click', ()=>{
+  try{
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return alert('Tu navegador no soporta reconocimiento de voz.');
+    const rec = new SR(); rec.lang = document.querySelector('#lang').value || 'es-AR'; rec.interimResults = false;
+    rec.onresult = async ev => {
+      const txt = ev.results[0][0].transcript || '';
+      document.querySelector('#text').value = txt;
+      const e = new KeyboardEvent('keydown', { key:'Enter' });
+      document.querySelector('#text').dispatchEvent(e);
+    };
+    rec.start();
+  }catch(e){ alert('No pude iniciar el micrófono.'); }
+});
 </script>
 </body>
 </html>
