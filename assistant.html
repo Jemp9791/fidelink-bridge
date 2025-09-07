@@ -10,7 +10,7 @@
   .wrap{max-width:920px;margin:24px auto;padding:16px}
   .card{background:#111827;border:1px solid #1f2937;border-radius:14px;padding:16px;margin:12px 0}
   label{display:block;font-size:13px;color:#9ca3af;margin-bottom:6px}
-  input,select,button,textarea{width:100%;padding:10px;border-radius:12px;border:1px solid #374151;background:#0b1220;color:#e5e7eb}
+  input,select,button{width:100%;padding:10px;border-radius:12px;border:1px solid #374151;background:#0b1220;color:#e5e7eb}
   button{cursor:pointer;font-weight:600}
   .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .actions a{display:inline-block;margin:6px 6px 0 0;padding:10px 12px;border-radius:12px;border:1px solid #374151;color:#e5e7eb;text-decoration:none}
@@ -37,7 +37,7 @@
         </select>
       </div>
     </div>
-    <div style="margin-top:8px" class="muted">
+    <div class="muted" style="margin-top:8px">
       Consejo: añadí esta página a la <b>pantalla de inicio</b> para usarla como app.
     </div>
   </div>
@@ -73,17 +73,17 @@
 </div>
 
 <script>
-/* ====== Guardado/lectura de API y Sheet ID ====== */
-const q = new URL(location.href);
-const qSheet = q.searchParams.get('sheet') || '';
+/* ====== Cargar/guardar API y Sheet ID ====== */
+const urlObj = new URL(location.href);
+const qSheet = urlObj.searchParams.get('sheet') || '';
 if (qSheet) localStorage.setItem('FIDELINK_SHEET_ID', qSheet);
-const SHEET_ID = localStorage.getItem('FIDELINK_SHEET_ID') || '';
+const SHEET_ID = localStorage.getItem('FIDELINK_SHEET_ID') || ''; // <- queda guardado
 
 const inputApi = document.querySelector('#apiUrl');
 inputApi.value = localStorage.getItem('FIDELINK_API_URL') || '';
 inputApi.addEventListener('change', () => localStorage.setItem('FIDELINK_API_URL', inputApi.value.trim()));
 
-/* ====== Utilidad para llamar al backend (siempre manda sheet_id) ====== */
+/* ====== Llamar al backend (siempre con sheet_id) ====== */
 async function callApi(payload){
   const url = (localStorage.getItem('FIDELINK_API_URL') || inputApi.value || '').trim();
   if (!url) throw new Error('Falta API URL (/exec).');
@@ -92,9 +92,9 @@ async function callApi(payload){
   return await res.json();
 }
 
-/* ====== UI mínima ====== */
+/* ====== UI ====== */
 const heard = v => document.querySelector('#heard').textContent = v||'—';
-const say   = v => document.querySelector('#reply').textContent = v||'—';
+const say = v => document.querySelector('#reply').textContent = v||'—';
 const actDiv= document.querySelector('#actions');
 
 function setActions(list){
@@ -134,14 +134,13 @@ document.querySelector('#text').addEventListener('keydown', async (e)=>{
   }catch(err){ say('No pude procesar. Revisá conexión / API_URL.'); }
 });
 
-/* ====== Voz simple (Web Speech API, si está) ====== */
-const btnMic = document.querySelector('#btnMic');
-btnMic.addEventListener('click', ()=>{
+/* ====== Voz (si el navegador soporta) ====== */
+document.querySelector('#btnMic').addEventListener('click', ()=>{
   try{
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) return alert('Tu navegador no soporta reconocimiento de voz.');
-    const rec = new SR(); rec.lang = document.querySelector('#lang').value || 'es-AR'; rec.interimResults = false;
-    rec.onresult = async ev => {
+    const rec = new SR(); rec.lang = document.querySelector('#lang').value || 'es-AR';
+    rec.onresult = ev => {
       const txt = ev.results[0][0].transcript || '';
       document.querySelector('#text').value = txt;
       const e = new KeyboardEvent('keydown', { key:'Enter' });
